@@ -1,0 +1,22 @@
+{
+  "template": "https://github.com/42nick/cookie-py-template",
+  "commit": "29d8fb9be04e41bff2511c81a128635df40c5cf8",
+  "checkout": "feat/poetry",
+  "context": {
+    "cookiecutter": {
+      "full_name": "Niklas Hahn",
+      "email": "smartcoder42@gmail.com",
+      "github_username": "42nick",
+      "project_name": "gpu-monitor",
+      "project_slug": "gpu_monitor",
+      "project_short_description": "Monitor your programms gpu and ram usage",
+      "version": "0.0.0",
+      "Do you want to add a .vscode folder and useful python related settings e.g. autoformatting on save with black and isort?\n[Please press enter for the next input]": "",
+      "additional_vsc_settings": "y",
+      "Do you want to link your project to sonarcloud.io for code quality analysis? You need to provide the sonarcloud organization in the next step and set the SONAR_TOKEN environment variable.\n[Please press enter for the next input]": "",
+      "sonarcloud": "n",
+      "_template": "https://github.com/42nick/cookie-py-template"
+    }
+  },
+  "directory": null
+}

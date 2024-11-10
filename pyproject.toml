@@ -1,0 +1,58 @@
+[tool.poetry]
+authors = ["Niklas Hahn <smartcoder42@gmail.com>"]
+description = "Monitor your programms gpu and ram usage"
+license = "MIT"
+name = "gpu_monitor"
+readme = "README.md"
+version = "0.0.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.test.dependencies]
+coverage = "^7.3.2"
+mypy = "^1.5.1"
+pytest = "^7.4.2"
+pytest-cov = "^4.1.0"
+ruff = "^0.7.3"
+tox = "^4.14.2"
+
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+ignore = ["T20", "D104", "D211", "D213"]
+select = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["transformers"]
+lines-after-imports = 2
+
+[tool.pytest.ini_options]
+addopts = "-v --cov=gpu_monitor --cov-branch --cov-report html:reports/html --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "raise AssertionError",
+  "def __repr__",
+  "def __str__",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]
+
+[tool.coverage.run]
+branch = true
+data_file = "reports/.coverage"
+
+
+[tool.mypy]
+strict = true
+warn_return_any = false
