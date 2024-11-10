@@ -7,8 +7,9 @@ readme = "README.md"
 version = "0.0.0"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+pre-commit = "^4.0.1"
 psutil = "^6.1.0"
+python = "^3.9"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.3.2"
@@ -23,17 +24,34 @@ tox = "^4.14.2"
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
+[tool.poetry.scripts]
+gpu-monitor = "gpu_monitor.main:main"
+
 [tool.ruff]
 line-length = 120
 target-version = "py311"
 
 [tool.ruff.lint]
-ignore = ["T20", "D104", "D211", "D213"]
-select = ["ALL"]
+ignore = [
+  "D104",   # undocumented-public-package
+  "D211",   # blank-line-before-class
+  "D213",   # multi-line-summary-second-line
+  "D413",   # Missing blank line after last section ("Args")
+  "G004",   # Logging statement uses f-string
+  "FBT",    # flake8-boolean-trap
+  "PTH123",  # builtin-open
+  "T20",    # Allow print statements
+]
+select = [
+  "ALL"
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["transformers"]
 lines-after-imports = 2
+
+[tool.ruff.pylint]
+max-args = 9
 
 [tool.pytest.ini_options]
 addopts = "-v --cov=gpu_monitor --cov-branch --cov-report html:reports/html --cov-report=term-missing"
