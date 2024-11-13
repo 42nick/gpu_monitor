@@ -10,6 +10,12 @@ version = "0.0.0"
 pre-commit = "^4.0.1"
 psutil = "^6.1.0"
 python = "^3.9"
+plotly = {version = "^5.24.1", optional = true}
+pandas = {version = "^2.2.3", optional = true}
+dash = {version = "^2.18.2", optional = true}
+
+[tool.poetry.extras]
+visu = ["plotly", "pandas", "dash"]
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.3.2"
@@ -37,8 +43,10 @@ ignore = [
   "D211",   # blank-line-before-class
   "D213",   # multi-line-summary-second-line
   "D413",   # Missing blank line after last section ("Args")
+  "DTZ005", # call-datetime-now-without-tzinfo
   "G004",   # Logging statement uses f-string
   "FBT",    # flake8-boolean-trap
+  "PD901",  # Avoid using the generic variable name `df` for DataFrames
   "PTH123",  # builtin-open
   "T20",    # Allow print statements
 ]

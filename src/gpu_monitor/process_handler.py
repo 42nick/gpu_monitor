@@ -10,10 +10,16 @@ import os
 import time
 from datetime import datetime
 from math import inf
+from pathlib import Path
 
 import psutil
 
 from gpu_monitor.gpu_info import get_gpu_info
+
+
+DEFAULT_STORING_ROOT = Path.home().joinpath(".gpu_monitor")
+DEFAULT_STORING_ROOT.mkdir(exist_ok=True)
+DEFAULT_STORING_NAME = "gpu_logs.csv"
 
 
 # Configure logging
@@ -22,12 +28,12 @@ logging.basicConfig(level=log_level, format="%(asctime)s - %(name)s - %(levelnam
 logger = logging.getLogger(__name__)
 
 
-def store_dicts_as_csv(data: list[dict], filename: str) -> None:
+def store_dicts_as_csv(data: list[dict], filepath: str) -> None:
     """Store a list of dictionaries as a CSV file.
 
     Args:
         data: A list of dictionaries containing the data to be written to the CSV file.
-        filename: The name of the CSV file to write the data to.
+        filepath: The name of the CSV file to write the data to.
     """
     if not data:
         print("No data to write.")
@@ -36,7 +42,11 @@ def store_dicts_as_csv(data: list[dict], filename: str) -> None:
     # Get the fieldnames from the keys of the first dictionary
     fieldnames = data[0].keys()
 
-    with open(filename, "w", newline="") as csvfile:
+    if filepath is None:
+        storing_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filepath = DEFAULT_STORING_ROOT.joinpath(f"{storing_date}_{DEFAULT_STORING_NAME}")
+
+    with open(filepath, "w", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for row in data:
@@ -48,7 +58,7 @@ def start_and_monitor(
     interval: int = 1,
     max_duration: int = inf,
     storing_interval: int = 10,
-    storing_location: str = ".vscode/process_info.csv",
+    log_location: Path | None = None,
     log_cpu_usage: bool = False,
 ) -> None:
     """Start and monitor a process.
@@ -58,7 +68,7 @@ def start_and_monitor(
         interval: Interval between checks in seconds.
         max_duration: Maximum duration to run in seconds.
         storing_interval: Interval between storing data in seconds.
-        storing_location: Location to store the CSV file.
+        log_location: Location to store the CSV file.
         log_cpu_usage: Whether to log CPU usage.
     """
     # Start the subprocess
@@ -92,12 +102,12 @@ def start_and_monitor(
                 process_ressource_data = get_gpu_info()
                 process_ressource_data["cpu_usage"] = cpu_usage
                 process_ressource_data["memory_usage"] = memory_usage
-                process_ressource_data["timestamp"] = str(datetime.now())  # noqa: DTZ005
+                process_ressource_data["timestamp"] = str(datetime.now())
                 storage_data.append(process_ressource_data)
 
                 time_since_laster_csv_update += interval
                 if time_since_laster_csv_update >= storing_interval:
-                    store_dicts_as_csv(storage_data, storing_location)
+                    store_dicts_as_csv(storage_data, log_location)
                     time_since_laster_csv_update = 0
 
                 time.sleep(interval)
@@ -108,7 +118,7 @@ def start_and_monitor(
         logger.debug("Monitoring stopped.")
     finally:
         # Log GPU info to CSV
-        store_dicts_as_csv(storage_data, storing_location)
+        store_dicts_as_csv(storage_data, log_location)
         # Terminate the process
         logger.debug("Terminating the process.")
 
