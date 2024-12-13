@@ -4,9 +4,12 @@ This module provides functionality to start and monitor a process, capturing its
 as well as GPU usage if applicable. The monitored data is stored in a CSV file at specified intervals.
 """
 
+from __future__ import annotations
+
 import csv
 import logging
 import os
+import subprocess
 import time
 from datetime import datetime
 from math import inf
@@ -71,6 +74,17 @@ def start_and_monitor(
         log_location: Location to store the CSV file.
         log_cpu_usage: Whether to log CPU usage.
     """
+    # check whether nvidia-smi is available
+    try:
+        subprocess.run(  # noqa: S603
+            ["nvidia-smi"],  # noqa: S607
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except FileNotFoundError:
+        logger.warning("nvidia-smi command not found. Can not log GPU data.")
+
     # Start the subprocess
     if command.split()[0].split(".")[-1] == "py":
         command = f"python {command}"
