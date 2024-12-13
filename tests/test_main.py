@@ -38,7 +38,11 @@ def test_main() -> None:
 def test_finish_with_error(dummy_script_path: Path) -> None:
     """Tests that the script properly dies after the called script raises and error."""
     start_time = time.time()
-    args = [f"python {dummy_script_path} --iterations 5 --error_at 0", "--interval", "0.1"]
+    args = [
+        f"python {dummy_script_path} --iterations 5 --error_at 0",
+        "--interval",
+        "0.1",
+    ]
     returncode = main(args)
     assert returncode != 0
     assert time.time() - start_time < 1
@@ -47,7 +51,11 @@ def test_finish_with_error(dummy_script_path: Path) -> None:
 def test_clean_finish(dummy_script_path: Path) -> None:
     """Tests that the script properly dies after the called script raises and error."""
     start_time = time.time()
-    args = [f"python {dummy_script_path} --iterations 0 --error_at 1", "--interval", "0.1"]
+    args = [
+        f"python {dummy_script_path} --iterations 0 --error_at 1",
+        "--interval",
+        "0.1",
+    ]
     returncode = main(args)
     assert returncode == 0
     assert time.time() - start_time < 2
@@ -56,7 +64,13 @@ def test_clean_finish(dummy_script_path: Path) -> None:
 def test_stopping_after_timeout(dummy_script_path: Path) -> None:
     """Tests that the script properly dies after the called script raises and error."""
     start_time = time.time()
-    args = [f"python {dummy_script_path} --iterations 3 --error_at 4", "--interval", "0.1", "--max_duration", "0.5"]
+    args = [
+        f"python {dummy_script_path} --iterations 3 --error_at 4",
+        "--interval",
+        "0.1",
+        "--max_duration",
+        "0.5",
+    ]
     returncode = main(args)
     assert (returncode) == -SIGKILL
     assert time.time() - start_time < 2

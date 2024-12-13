@@ -1,5 +1,7 @@
 """Main module for the gpu monitor script."""
 
+from __future__ import annotations
+
 import argparse
 import sys
 from argparse import RawTextHelpFormatter
@@ -15,13 +17,28 @@ E.g. gpu-monitor 'python train.py'
 Default log location: {DEFAULT_LOG_LOCATION}"""
 
 
-def main(args: list[str]) -> int:
+def main(args: list[str] | None = None) -> int:
     """Entry point for the gpu monitor script."""
     parser = argparse.ArgumentParser(description=DESCRIPTION, formatter_class=RawTextHelpFormatter)
     parser.add_argument("command", type=str, help="The command to run. E.g. 'python train.py'.")
-    parser.add_argument("--interval", type=float, default=1.0, help="Interval between checks in seconds.")
-    parser.add_argument("--max_duration", type=float, default=inf, help="Maximum duration to run in seconds.")
-    parser.add_argument("--storing_interval", type=int, default=10, help="Interval between storing data in seconds.")
+    parser.add_argument(
+        "--interval",
+        type=float,
+        default=1.0,
+        help="Interval between checks in seconds.",
+    )
+    parser.add_argument(
+        "--max_duration",
+        type=float,
+        default=inf,
+        help="Maximum duration to run in seconds.",
+    )
+    parser.add_argument(
+        "--storing_interval",
+        type=int,
+        default=10,
+        help="Interval between storing data in seconds.",
+    )
     parser.add_argument(
         "--log_location",
         type=Path,

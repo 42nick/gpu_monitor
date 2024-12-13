@@ -35,9 +35,9 @@ def get_gpu_info() -> list[dict[str, Any]]:
 
     except FileNotFoundError:
         print("nvidia-smi command not found.")
-        return []
+        return {}
     except subprocess.CalledProcessError as cpe:
         print(f"CalledProcessError occurred: {cpe}")
-        return []
+        return {}
 
     return gpu_info_dict
