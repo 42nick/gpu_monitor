@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
@@ -27,7 +28,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+
           python -m pip install --upgrade pip
+          pip3 install setuptools # for python >=3.12 https://stackoverflow.com/a/76691103
           pip install poetry
           poetry install --with test
 
