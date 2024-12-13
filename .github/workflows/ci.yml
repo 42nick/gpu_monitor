@@ -30,7 +30,8 @@ jobs:
         run: |
           # for autoflake python >=3.12 https://stackoverflow.com/a/76691103
           if [[ "${{ matrix.python-version }}" == "3.12" || "${{ matrix.python-version }}" == "3.13" ]]; then
-            sudo apt-get install python${{ matrix.python-version }}-distutils
+            sudo apt-get install python3-setuptools
+
           fi
           python -m pip install --upgrade pip
           pip install poetry
