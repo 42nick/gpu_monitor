@@ -55,8 +55,8 @@ def store_dicts_as_csv(data: list[dict], filepath: str) -> None:
 
 def start_and_monitor(
     command: str,
-    interval: int = 1,
-    max_duration: int = inf,
+    interval: float = 1.0,
+    max_duration: float = inf,
     storing_interval: int = 10,
     log_location: Path | None = None,
     log_cpu_usage: bool = False,
@@ -87,7 +87,7 @@ def start_and_monitor(
         time_since_laster_csv_update = 0
         while time.time() - start_time < max_duration and process.is_running():
             # Check if the process is still running
-            if psutil.pid_exists(pid):
+            if psutil.pid_exists(pid) and process.status() != psutil.STATUS_ZOMBIE:
                 proc = psutil.Process(pid)
                 cpu_usage = proc.cpu_percent(interval=interval) if log_cpu_usage else 0
                 memory_info = proc.memory_info()
@@ -127,3 +127,5 @@ def start_and_monitor(
         process.kill()
         process.wait()
         logger.debug("Process terminated.")
+
+    return process.returncode
