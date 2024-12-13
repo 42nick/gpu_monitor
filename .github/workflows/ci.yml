@@ -31,7 +31,7 @@ jobs:
 
           python -m pip install --upgrade pip
           # for autoflake python >=3.12 https://stackoverflow.com/a/76691103
-          apt-get install python${{ matrix.python-version }}-distutils
+          sudo apt-get install python${{ matrix.python-version }}-distutils
           pip install poetry
           poetry install --with test
 
