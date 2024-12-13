@@ -1,3 +1,5 @@
+"""Dummy script for testing."""
+
 import argparse
 import sys
 from time import sleep
