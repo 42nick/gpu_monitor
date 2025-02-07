@@ -56,6 +56,72 @@ def store_dicts_as_csv(data: list[dict], filepath: str) -> None:
             writer.writerow(row)
 
 
+def check_nvidia_smi() -> None:
+    """Check if nvidia-smi is available."""
+    try:
+        subprocess.run(  # noqa: S603
+            ["nvidia-smi"],  # noqa: S607
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except FileNotFoundError:
+        logger.warning("nvidia-smi command not found. Can not log GPU data.")
+
+
+def start_process(command: str) -> psutil.Popen:
+    """Start the subprocess.
+
+    Args:
+        command: The command to run.
+
+    Returns:
+        The started process.
+    """
+    if command.split()[0].split(".")[-1] == "py":
+        command = f"python {command}"
+        logger.debug(f"Adding python to command: {command}")
+    return psutil.Popen(command.split())
+
+
+def collect_process_data(proc: psutil.Process, log_cpu_usage: bool) -> dict:
+    """Collect data from the process.
+
+    Args:
+        proc: The process to collect data from.
+        log_cpu_usage: Whether to log CPU usage.
+
+    Returns:
+        A dictionary containing the collected data.
+    """
+    cpu_usage = proc.cpu_percent(interval=0) if log_cpu_usage else 0
+    memory_info = proc.memory_full_info()
+    memory_usage_rss = memory_info.rss
+    memory_usage_pss = memory_info.pss
+    memory_usage_uss = memory_info.uss
+    shared_memory = memory_info.shared
+
+    for child in proc.children(recursive=True):
+        try:
+            child_memory_info = child.memory_full_info()
+            memory_usage_rss += child_memory_info.rss
+            memory_usage_pss += child_memory_info.pss
+            memory_usage_uss += child_memory_info.uss
+            shared_memory += child_memory_info.shared
+        except psutil.NoSuchProcess:
+            continue
+
+    process_resource_data = get_gpu_info()
+    process_resource_data["cpu_usage"] = cpu_usage
+    process_resource_data["memory_usage_rss"] = memory_usage_rss
+    process_resource_data["memory_usage_pss"] = memory_usage_pss
+    process_resource_data["memory_usage_uss"] = memory_usage_uss
+    process_resource_data["shared_memory"] = shared_memory
+    process_resource_data["timestamp"] = str(datetime.now())
+
+    return process_resource_data
+
+
 def start_and_monitor(
     command: str,
     interval: float = 1.0,
@@ -74,55 +140,25 @@ def start_and_monitor(
         log_location: Location to store the CSV file.
         log_cpu_usage: Whether to log CPU usage.
     """
-    # check whether nvidia-smi is available
-    try:
-        subprocess.run(  # noqa: S603
-            ["nvidia-smi"],  # noqa: S607
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except FileNotFoundError:
-        logger.warning("nvidia-smi command not found. Can not log GPU data.")
+    check_nvidia_smi()
 
-    # Start the subprocess
-    if command.split()[0].split(".")[-1] == "py":
-        command = f"python {command}"
-        logger.debug(f"Adding python to command: {command}")
-    process = psutil.Popen(command.split())
-
-    # Get the process ID
+    process = start_process(command)
     pid = process.pid
 
-    # Monitor the process
     storage_data = []
     try:
         start_time = time.time()
-        time_since_laster_csv_update = 0
+        time_since_last_csv_update = 0
         while time.time() - start_time < max_duration and process.is_running():
-            # Check if the process is still running
             if psutil.pid_exists(pid) and process.status() != psutil.STATUS_ZOMBIE:
                 proc = psutil.Process(pid)
-                cpu_usage = proc.cpu_percent(interval=interval) if log_cpu_usage else 0
-                memory_info = proc.memory_info()
-                memory_usage = memory_info.rss
+                process_resource_data = collect_process_data(proc, log_cpu_usage)
+                storage_data.append(process_resource_data)
 
-                for child in proc.children(recursive=True):
-                    try:
-                        memory_usage += child.memory_info().rss
-                    except psutil.NoSuchProcess:
-                        continue
-
-                process_ressource_data = get_gpu_info()
-                process_ressource_data["cpu_usage"] = cpu_usage
-                process_ressource_data["memory_usage"] = memory_usage
-                process_ressource_data["timestamp"] = str(datetime.now())
-                storage_data.append(process_ressource_data)
-
-                time_since_laster_csv_update += interval
-                if time_since_laster_csv_update >= storing_interval:
+                time_since_last_csv_update += interval
+                if time_since_last_csv_update >= storing_interval:
                     store_dicts_as_csv(storage_data, log_location)
-                    time_since_laster_csv_update = 0
+                    time_since_last_csv_update = 0
 
                 time.sleep(interval)
             else:
@@ -131,12 +167,10 @@ def start_and_monitor(
     except KeyboardInterrupt:
         logger.debug("Monitoring stopped.")
     finally:
-        # Log GPU info to CSV
         store_dicts_as_csv(storage_data, log_location)
-        # Terminate the process
         logger.debug("Terminating the process.")
 
-        for child in process.children(recursive=True):  # or parent.children() for recursive=False
+        for child in process.children(recursive=True):
             child.kill()
         process.kill()
         process.wait()
