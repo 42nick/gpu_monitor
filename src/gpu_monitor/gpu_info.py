@@ -31,7 +31,9 @@ def get_gpu_info() -> list[dict[str, Any]]:
             gpu_info_dict[f"gpu_{index}_name"] = name
             gpu_info_dict[f"gpu_{index}_memory_total"] = int(memory_total)
             gpu_info_dict[f"gpu_{index}_memory_used"] = int(memory_used)
-            gpu_info_dict[f"gpu_{index}_utilization_gpu"] = int(utilization_gpu)
+            gpu_info_dict[f"gpu_{index}_utilization_gpu"] = (
+                int(utilization_gpu) if isinstance(utilization_gpu, int) else 0
+            )
 
     except FileNotFoundError:
         print("nvidia-smi command not found.")
