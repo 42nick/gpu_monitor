@@ -34,7 +34,7 @@ jobs:
 
       - name: Install pre-commit
         run: |
-          pre-commit install
+          uv run pre-commit install
 
       - name: Run pre-commit checks
         run: pre-commit run --all-files
