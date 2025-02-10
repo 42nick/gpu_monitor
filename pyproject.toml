@@ -1,37 +1,40 @@
-[tool.poetry]
-authors = ["Niklas Hahn <smartcoder42@gmail.com>"]
-description = "Monitor your programms gpu and ram usage"
-license = "MIT"
+[project]
 name = "gpu_monitor"
-readme = "README.md"
 version = "0.0.0"
+description = "Monitor your programms gpu and ram usage"
+authors = [{ name = "Niklas Hahn", email = "smartcoder42@gmail.com" }]
+requires-python = "~=3.9"
+readme = "README.md"
+license = "MIT"
+dependencies = ["psutil>=6.1.0,<7"]
 
-[tool.poetry.dependencies]
-dash = { version = "^2.18.2", optional = true }
-pandas = { version = "^2.2.3", optional = true }
-plotly = { version = "^5.24.1", optional = true }
-psutil = "^6.1.0"
-python = "^3.9"
+[project.optional-dependencies]
+visu = [
+    "plotly>=5.24.1,<6",
+    "pandas>=2.2.3,<3",
+    "dash>=2.18.2,<3",
+]
 
-[tool.poetry.extras]
-visu = ["plotly", "pandas", "dash"]
+[project.scripts]
+gpu-monitor = "gpu_monitor.main:main"
 
-[tool.poetry.group.test.dependencies]
-coverage = "^7.3.2"
-mypy = "^1.5.1"
-pre-commit = "^4.0.1"
-pytest = "^7.4.2"
-pytest-cov = "^4.1.0"
-ruff = "^0.7.3"
-tox = "^4.14.2"
+[dependency-groups]
+test = [
+    "coverage>=7.3.2,<8",
+    "mypy>=1.5.1,<2",
+    "pre-commit>=4.0.1,<5",
+    "pytest>=7.4.2,<8",
+    "pytest-cov>=4.1.0,<5",
+    "ruff>=0.7.3,<0.8",
+    "tox>=4.14.2,<5",
+]
 
+[tool.uv]
+default-groups = ["test"]
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
-
-[tool.poetry.scripts]
-gpu-monitor = "gpu_monitor.main:main"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 120
@@ -85,7 +88,6 @@ exclude_lines = [
 [tool.coverage.run]
 branch = true
 data_file = "reports/.coverage"
-
 
 [tool.mypy]
 strict = true
