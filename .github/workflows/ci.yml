@@ -34,7 +34,6 @@ jobs:
 
       - name: Install pre-commit
         run: |
-          pip install pre-commit
           pre-commit install
 
       - name: Run pre-commit checks
@@ -42,4 +41,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest
+          uv run pytest
